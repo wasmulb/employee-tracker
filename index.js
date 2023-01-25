@@ -7,7 +7,7 @@ const db = mysql.createConnection(
     {
         host: 'localhost',
         user:'root',
-        password:'',
+        password:'50ldpssbu50',
         database:'new_db'
     },
     console.log('Connected to new_db')
@@ -29,24 +29,6 @@ const menuQuestions = [
         message:"What is this department's name?",
     },
   ];
-
-//   const roleQuestion = [
-//     {
-//         type:"input",
-//         name:"roleName",
-//         message:"What is this role's name?",
-//     },
-//     {
-//         type:"input",
-//         name:"salary",
-//         message:"What is this role's salary?"
-//     },
-//     {
-//         type:"input",
-//         name:"dep",
-//         message:"What department does this role belong to?"
-//     }
-//   ];
 
   const employeeQuestion = [
     {
@@ -100,9 +82,13 @@ const menuQuestions = [
 
   function addRole(){
     db.query(`SELECT * FROM departments`, (err, result) => {
+        console.log(result)
         if(err) throw err;
-        depArray = result.map(function (obj) {
-            return obj.department;
+        depArray = result.map(item =>{
+            return {
+                name: item.department,
+                value: item.id
+            };
           });
           const roleQuestion = [
             {
@@ -123,7 +109,50 @@ const menuQuestions = [
             }
           ];
     inquirer.prompt(roleQuestion).then((answers) => {
-        db.query(`INSERT INTO roles (title, salary) VALUES (?, ?)`, answers.roleName, answers.salary)
+        console.log(answers)
+        db.query(`INSERT INTO roles (department_id, title, salary) VALUES (?, ?, ?)`, [answers.dep, answers.roleName, answers.salary])
+    })
+    })
+  };
+
+// add employee function
+
+function addEmployee(){
+    db.query(`SELECT * FROM roles`, (err, result) => {
+        console.log(result)
+        if(err) throw err;
+        roleArray = result.map(item =>{
+            return {
+                name: item.title,
+                value: item.id
+            };
+          });
+          const employeeQuestion = [
+            {
+                type:"input",
+                name:"firstName",
+                message:"What is this employee's first name?",
+            },
+            {
+                type:"input",
+                name:"lastName",
+                message:"What is this employee's last name?"
+            },
+            {
+                type:"list",
+                name:"role",
+                message:"What is the the role of this employee?",
+                choices: roleArray
+            },
+            {
+                type:"input",
+                name:"manager",
+                message:"Who is this employee's manager?"
+            }
+          ]
+    inquirer.prompt(employeeQuestion).then((answers) => {
+        console.log(answers)
+        db.query(`INSERT INTO employees (role_id, first_name, last_name, manager_id) VALUES (?, ?, ?, ?)`, [answers.role, answers.firstName, answers.latName, answers.manager])
     })
     })
   };
@@ -135,7 +164,7 @@ const menuQuestions = [
   };
 
   function viewRoles () {
-    db.query('SELECT * FROM roles JOIN departments ON roles.department_id = departments.id;', function (err, results) {
+    db.query('SELECT * FROM roles;', function (err, results) {
         console.table(results)
     })
   };

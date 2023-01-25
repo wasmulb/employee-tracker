@@ -1,17 +1,4 @@
-// const person = {
-//     firstName: 'John',
-//     lastName: 'Doe'
-// };
-
-// const propertyNames = Object.keys(person);
-
-// // console.log(propertyNames);[ 'firstName', 'lastName' ]
-
-// const propertyValues = Object.values(person);
-
-// // console.log(propertyValues);[ 'John', 'Doe' ]
-
-const result = [
+let result = [
     { id: 1, department: 'Engineering' },
     { id: 2, department: 'Weapons' },
     { id: 3, department: 'Navigation' },
@@ -20,15 +7,25 @@ const result = [
     { id: 6, department: 'Test' }
   ]
 
-  depArray = result.map(function (obj) {
-    return obj.department;
+  let arrayObj = [{key1:'value1', key2:'value2'},{key1:'value1', key2:'value2'}];
+
+  arrayObj = arrayObj.map(item => {
+    return {
+      stroke: item.key1,
+      strike: item.key2
+    };
   });
 
-  console.log(depArray)
+  console.log(arrayObj);
 
-// for(i=0;i<result.length;i++){
-//     let depChoices = [];
-//     let depArray = Object.values(result[i])
-//     depChoices.push(depArray)
-//     console.log(dep)
-// }
+  result = result.map(item =>{
+    return {
+        name: item.department,
+        value: item.id
+    };
+  });
+
+  console.log(result)
+
+  depArray = result.map(function (obj) {
+    return obj.department;

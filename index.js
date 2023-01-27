@@ -18,7 +18,7 @@ const menuQuestions = [
         type:"list",
         name:"menu",
         message:"What would you like to do?",
-        choices: ["View all departments", "View all roles","View all Employees", "Add a department", "Add a role", "Add an employee", "Update an employee role"]
+        choices: ["View all departments", "View all roles","View all Employees", "Add a department", "Add a role", "Add an employee", "Update an employee's role"]
     },
   ];
 
@@ -28,6 +28,11 @@ const menuQuestions = [
         name:"depName",
         message:"What is this department's name?",
     },
+    {
+        type: 'confirm',
+        name: 'goToMenu',
+        message: 'Press ENTER to return to the selection menu'
+    }
   ];
 
   const employeeQuestion = [
@@ -58,7 +63,6 @@ const menuQuestions = [
     inquirer.prompt(menuQuestions).then((answers) => {
       if (answers.menu === "View all departments"){
         viewDepartments();
-        ask();
       } else if(answers.menu === "View all roles"){
         viewRoles();
       } else if(answers.menu === "View all Employees"){
@@ -69,16 +73,25 @@ const menuQuestions = [
         addRole();
       } else if(answers.menu === "Add an employee"){
         addEmployee();
+      } else if(answers.menu === "Update an employee's role"){
+        updateEmployee();
       }
     });
   };
+
+  // Add a department 
 
   function addDepartment(){
     inquirer.prompt(depQuestion).then((answers) => {
         console.log(answers.depName)
         db.query(`INSERT INTO departments (department) VALUES (?)`, answers.depName)
+        if (answers.goToMenu){
+            ask();
+        }
     })
   };
+
+  // Add a role function 
 
   function addRole(){
     db.query(`SELECT * FROM departments`, (err, result) => {
@@ -106,11 +119,19 @@ const menuQuestions = [
                 name:"dep",
                 message:"What department does this role belong to?",
                 choices: depArray
+            },
+            {
+                type: 'confirm',
+                name: 'goToMenu',
+                message: 'Press ENTER to return to the selection menu'
             }
           ];
     inquirer.prompt(roleQuestion).then((answers) => {
         console.log(answers)
         db.query(`INSERT INTO roles (department_id, title, salary) VALUES (?, ?, ?)`, [answers.dep, answers.roleName, answers.salary])
+        if(answers.goToMenu){
+            ask();
+        }
     })
     })
   };
@@ -127,6 +148,16 @@ function addEmployee(){
                 value: item.id
             };
           });
+    db.query(`SELECT * FROM employees`, (err, result) => {
+        console.log(result)
+        if(err) throw err;
+        employeeArray = result.map(item => {
+            return {
+                name: item.firstName,
+                value: item.id
+            }
+        })
+    
           const employeeQuestion = [
             {
                 type:"input",
@@ -145,14 +176,74 @@ function addEmployee(){
                 choices: roleArray
             },
             {
-                type:"input",
+                type:"list",
                 name:"manager",
-                message:"Who is this employee's manager?"
+                message:"Who is this employee's manager?",
+                choices: employeeArray
+            },
+            {
+                type: 'confirm',
+                name: 'goToMenu',
+                message: 'Press ENTER to return to the selection menu'
             }
           ]
     inquirer.prompt(employeeQuestion).then((answers) => {
         console.log(answers)
-        db.query(`INSERT INTO employees (role_id, first_name, last_name, manager_id) VALUES (?, ?, ?, ?)`, [answers.role, answers.firstName, answers.latName, answers.manager])
+        db.query(`INSERT INTO employees (role_id, first_name, last_name, manager_id) VALUES (?, ?, ?, ?)`, [answers.role, answers.firstName, answers.lastName, answers.manager])
+        if(answers.goToMenu){
+            ask();
+        }
+    })
+    })
+    })
+  };
+
+  function updateEmployee(){
+    db.query(`SELECT * FROM roles`, (err, result) => {
+        console.log(result)
+        if(err) throw err;
+        roleArray = result.map(item =>{
+            return {
+                name: item.title,
+                value: item.id
+            };
+          });
+    db.query(`SELECT * FROM employees`, (err, result) => {
+        console.log(result)
+        if(err) throw err;
+        employeeArray = result.map(item => {
+            return {
+                name: item.firstName,
+                value: item.id
+            }
+        })
+    
+          const updateQuestion = [
+            {
+                type:"list",
+                name:"selectedEmployee",
+                message:"Which employee would you like to update?",
+                choices: employeeArray
+            },
+            {
+                type:"list",
+                name:"role",
+                message:"Which role should this employee be updated to?",
+                choices: roleArray
+            },
+            {
+                type: 'confirm',
+                name: 'goToMenu',
+                message: 'Press ENTER to return to the selection menu'
+            }
+          ]
+    inquirer.prompt(updateQuestion).then((answers) => {
+        console.log(answers)
+        db.query(`UPDATE employees SET role_id = ? WHERE id = ?;`, [answers.role, answers.firstName])
+        if(answers.goToMenu){
+            ask();
+        }
+    })
     })
     })
   };
@@ -161,18 +252,21 @@ function addEmployee(){
     db.query('SELECT * FROM departments', function (err, results) {
         console.table(results)
     })
+    ask();
   };
 
   function viewRoles () {
     db.query('SELECT * FROM roles;', function (err, results) {
         console.table(results)
     })
+    ask();
   };
 
   function viewEmployees () {
     db.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary FROM employees LEFT JOIN roles ON employees.role_id = roles.id', function (err, results) {
         console.table(results)
     })
+    ask();
   }
 
   ask();

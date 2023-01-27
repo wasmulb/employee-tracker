@@ -7,7 +7,7 @@ const db = mysql.createConnection(
     {
         host: 'localhost',
         user:'root',
-        password:'50ldpssbu50',
+        password: "",
         database:'new_db'
     },
     console.log('Connected to new_db')
@@ -250,21 +250,21 @@ function addEmployee(){
 
   function viewDepartments () {
     db.query('SELECT * FROM departments', function (err, results) {
-        console.table(results)
+        console.table("\n", results)
     })
     ask();
   };
 
   function viewRoles () {
-    db.query('SELECT * FROM roles;', function (err, results) {
-        console.table(results)
+    db.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles LEFT JOIN departments ON roles.department_id = departments.id;;', function (err, results) {
+        console.table("\n",results)
     })
     ask();
   };
 
   function viewEmployees () {
     db.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary FROM employees LEFT JOIN roles ON employees.role_id = roles.id', function (err, results) {
-        console.table(results)
+        console.table("\n",results)
     })
     ask();
   }

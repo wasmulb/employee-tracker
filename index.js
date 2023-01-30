@@ -7,7 +7,7 @@ const db = mysql.createConnection(
     {
         host: 'localhost',
         user:'root',
-        password: "",
+        password: "50ldpssbu50",
         database:'new_db'
     },
     console.log('Connected to new_db')
@@ -18,7 +18,7 @@ const menuQuestions = [
         type:"list",
         name:"menu",
         message:"What would you like to do?",
-        choices: ["View all departments", "View all roles","View all Employees", "Add a department", "Add a role", "Add an employee", "Update an employee's role"]
+        choices: ["View all departments", "View all roles","View all Employees", "Add a department", "Add a role", "Add an employee", "Update an employee's role", "Delete a department", "Delete a role","Quit application"]
     },
   ];
 
@@ -75,6 +75,12 @@ const menuQuestions = [
         addEmployee();
       } else if(answers.menu === "Update an employee's role"){
         updateEmployee();
+      } else if(answers.menu === "Delete a department"){
+        deleteDep();
+      } else if(answers.menu === "Delete a role"){
+        deleteRole();
+      }else if(answers.menu === "Quit application"){
+        db.end();
       }
     });
   };
@@ -95,7 +101,6 @@ const menuQuestions = [
 
   function addRole(){
     db.query(`SELECT * FROM departments`, (err, result) => {
-        console.log(result)
         if(err) throw err;
         depArray = result.map(item =>{
             return {
@@ -127,7 +132,6 @@ const menuQuestions = [
             }
           ];
     inquirer.prompt(roleQuestion).then((answers) => {
-        console.log(answers)
         db.query(`INSERT INTO roles (department_id, title, salary) VALUES (?, ?, ?)`, [answers.dep, answers.roleName, answers.salary])
         if(answers.goToMenu){
             ask();
@@ -140,7 +144,6 @@ const menuQuestions = [
 
 function addEmployee(){
     db.query(`SELECT * FROM roles`, (err, result) => {
-        console.log(result)
         if(err) throw err;
         roleArray = result.map(item =>{
             return {
@@ -149,11 +152,10 @@ function addEmployee(){
             };
           });
     db.query(`SELECT * FROM employees`, (err, result) => {
-        console.log(result)
         if(err) throw err;
         employeeArray = result.map(item => {
             return {
-                name: item.firstName,
+                name: item.first_name,
                 value: item.id
             }
         })
@@ -188,7 +190,6 @@ function addEmployee(){
             }
           ]
     inquirer.prompt(employeeQuestion).then((answers) => {
-        console.log(answers)
         db.query(`INSERT INTO employees (role_id, first_name, last_name, manager_id) VALUES (?, ?, ?, ?)`, [answers.role, answers.firstName, answers.lastName, answers.manager])
         if(answers.goToMenu){
             ask();
@@ -200,7 +201,6 @@ function addEmployee(){
 
   function updateEmployee(){
     db.query(`SELECT * FROM roles`, (err, result) => {
-        console.log(result)
         if(err) throw err;
         roleArray = result.map(item =>{
             return {
@@ -209,11 +209,10 @@ function addEmployee(){
             };
           });
     db.query(`SELECT * FROM employees`, (err, result) => {
-        console.log(result)
         if(err) throw err;
         employeeArray = result.map(item => {
             return {
-                name: item.firstName,
+                name: item.first_name,
                 value: item.id
             }
         })
@@ -238,8 +237,7 @@ function addEmployee(){
             }
           ]
     inquirer.prompt(updateQuestion).then((answers) => {
-        console.log(answers)
-        db.query(`UPDATE employees SET role_id = ? WHERE id = ?;`, [answers.role, answers.firstName])
+        db.query(`UPDATE employees SET role_id = ? WHERE id = ?;`, [answers.role, answers.selectedEmployee])
         if(answers.goToMenu){
             ask();
         }
@@ -256,7 +254,7 @@ function addEmployee(){
   };
 
   function viewRoles () {
-    db.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles LEFT JOIN departments ON roles.department_id = departments.id;;', function (err, results) {
+    db.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles LEFT JOIN departments ON roles.department_id = departments.id', function (err, results) {
         console.table("\n",results)
     })
     ask();
@@ -267,6 +265,72 @@ function addEmployee(){
         console.table("\n",results)
     })
     ask();
+  }
+
+  //Bonus Functions
+
+  function deleteDep (){
+    db.query(`SELECT * FROM departments`, (err, result) => {
+      if(err) throw err;
+      depArray = result.map(item =>{
+          return {
+              name: item.department,
+              value: item.id
+          };
+        });
+        const delDepQuestion = [
+          {
+              type:"list",
+              name:"dep",
+              message:"Which department would you like to delete?",
+              choices: depArray
+          },
+          {
+              type: 'confirm',
+              name: 'goToMenu',
+              message: 'Press ENTER to return to the selection menu'
+          }
+        ];
+  inquirer.prompt(delDepQuestion).then((answers) => {
+      db.query(`DELETE FROM departments WHERE id = ?`, answers.dep)
+      if(answers.goToMenu){
+          ask();
+      }
+  })
+  })
+
+  }
+
+  function deleteRole (){
+    db.query(`SELECT * FROM roles`, (err, result) => {
+      if(err) throw err;
+      depArray = result.map(item =>{
+          return {
+              name: item.title,
+              value: item.id
+          };
+        });
+        const delDepQuestion = [
+          {
+              type:"list",
+              name:"dep",
+              message:"Which role would you like to delete?",
+              choices: depArray
+          },
+          {
+              type: 'confirm',
+              name: 'goToMenu',
+              message: 'Press ENTER to return to the selection menu'
+          }
+        ];
+  inquirer.prompt(delDepQuestion).then((answers) => {
+      db.query(`DELETE FROM roles WHERE id = ?`, answers.dep)
+      if(answers.goToMenu){
+          ask();
+      }
+  })
+  })
+
   }
 
   ask();

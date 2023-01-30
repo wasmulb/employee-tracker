@@ -17,7 +17,7 @@ To install, clone my repo from the link above to your local computer. Perform an
 
 ## Usage
 
-To use this application, "node index.js" in the command line. Follow the prompts. A seeds.sql file is provided if you wish to have a starting template.
+To use this application, "node index.js" in the command line. Follow the prompts. A seeds.sql file is provided if you wish to have a starting template. The user must enter their password on line 10 of index.js file.
 
 Refer to the link above for the video tutorial.
 

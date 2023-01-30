@@ -1,6 +1,6 @@
 # Employee Tracker
 
-## Link to video tutorial:
+## Link to video tutorial: https://drive.google.com/file/d/1FxSgjnNH4WIKFA3LEClANTJddpu6WQCo/view
 
 ## Lin to the application's repository: https://github.com/wasmulb/employee-tracker
 
